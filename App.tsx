@@ -1,125 +1,22 @@
-import React, { useState } from "react";
-import {View,Text, StyleSheet, Alert, Image, Button} from 'react-native'
-import {launchImageLibrary as _launchImageLibrary, launchCamera as _launchCamera} from 'react-native-image-picker'
-import RNFS from "react-native-fs";
-let launchImageLibrary = _launchImageLibrary;
-let launchCamera = _launchCamera;
-
-const App = ()=>{
-
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  const openImagePicker = () => {
-    const options = {
-      mediaType: 'photo',
-      includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
-    };
-
-    launchImageLibrary(options, handleResponse);
-  };
-
-  const handleCameraLaunch = () => {
-    const options = {
-      mediaType: 'photo',
-      includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
-    };
-
-    launchCamera(options, handleResponse);
-  };
+import React from "react";
+import HomeScreen from "./src/screens/HomeScreen";
+import { createStackNavigator } from "@react-navigation/stack";
+import NotificationScreen from "./src/screens/NotificationScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import NavigationService from "./src/services/NavigationService";
 
 
-  const handleResponse =async (response) => {
-    if (response.didCancel) {
-      Alert.alert("Cancelled", "User cancelled image picker");
-    } else if (response.errorMessage) {
-      Alert.alert("Error", response.errorMessage);
-    } else if (response.assets && response.assets.length > 0) {
-      const sourceUri = response.assets[0].uri;
+const Stack = createStackNavigator()
 
-      // Define the local path where the image will be saved
-      const fileName = `image_${Date.now()}.jpg`;
-      const localPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-
-      try {
-        await RNFS.copyFile(sourceUri, localPath);
-        Alert.alert("Success", "Image saved successfully!");
-        console.log('localPath',localPath)
-        setSelectedImage(`file://${localPath}`);
-      } catch (error) {
-        Alert.alert("Error", "Failed to save image");
-        console.error(error);
-      }
-    }
-  };
-
-  return (
-    <View style={{ flex: 1, justifyContent: 'center' }}>
-      {selectedImage && (
-        <Image
-          source={{ uri: selectedImage }}
-          style={{ flex: 1, width:200, height:200 }}
-          resizeMode="contain"
-        />
-      )}
-      <View style={{ marginTop: 20 }}>
-        <Button title="Choose from Device" onPress={openImagePicker} />
-      </View>
-      <View style={{ marginTop: 20, marginBottom: 50 }}>
-        <Button title="Open Camera" onPress={handleCameraLaunch} />
-      </View>
-    </View>
+const App = () =>{
+  return(
+    <NavigationContainer>
+      <Stack.Navigator ref={(ref)=>NavigationService.setTopLevelNavigator(ref)} >
+      <Stack.Screen name='Home' component={HomeScreen} />
+      <Stack.Screen name='Notification' component={NotificationScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   )
 }
 
-export default App;
-
-const styles = StyleSheet.create({
-  container: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 16,
-  },
-  header: {
-      fontSize: 20,
-      marginBottom: 16,
-  },
-  button: {
-      backgroundColor: "#007AFF",
-      padding: 10,
-      borderRadius: 8,
-      marginBottom: 16,
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.4,
-      shadowRadius: 4,
-      elevation: 5,
-  },
-  buttonText: {
-      color: "#FFFFFF",
-      fontSize: 16,
-      fontWeight: "bold",
-  },
-  imageContainer: {
-      borderRadius: 8,
-      marginBottom: 16,
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.4,
-      shadowRadius: 4,
-      elevation: 5,
-  },
-  image: {
-      width: 200,
-      height: 200,
-      borderRadius: 8,
-  },
-  errorText: {
-      color: "red",
-      marginTop: 16,
-  },
-});
+export default App

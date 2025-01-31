@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "335285848208",
+    "project_id": "reactnative-pushpractice",
+    "storage_bucket": "reactnative-pushpractice.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335285848208:android:a432b1960ae1e44c823015",
+        "android_client_info": {
+          "package_name": "com.imageuploadingpractice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_MfQqMh2OSv4UwSG8G-tKKTDbEIhrZx0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
