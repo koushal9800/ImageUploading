@@ -1,118 +1,125 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from "react";
+import {View,Text, StyleSheet, Alert, Image, Button} from 'react-native'
+import {launchImageLibrary as _launchImageLibrary, launchCamera as _launchCamera} from 'react-native-image-picker'
+import RNFS from "react-native-fs";
+let launchImageLibrary = _launchImageLibrary;
+let launchCamera = _launchCamera;
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = ()=>{
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const [selectedImage, setSelectedImage] = useState(null);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const openImagePicker = () => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    };
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+    launchImageLibrary(options, handleResponse);
+  };
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const handleCameraLaunch = () => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    };
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    launchCamera(options, handleResponse);
+  };
+
+
+  const handleResponse =async (response) => {
+    if (response.didCancel) {
+      Alert.alert("Cancelled", "User cancelled image picker");
+    } else if (response.errorMessage) {
+      Alert.alert("Error", response.errorMessage);
+    } else if (response.assets && response.assets.length > 0) {
+      const sourceUri = response.assets[0].uri;
+
+      // Define the local path where the image will be saved
+      const fileName = `image_${Date.now()}.jpg`;
+      const localPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+      try {
+        await RNFS.copyFile(sourceUri, localPath);
+        Alert.alert("Success", "Image saved successfully!");
+        console.log('localPath',localPath)
+        setSelectedImage(`file://${localPath}`);
+      } catch (error) {
+        Alert.alert("Error", "Failed to save image");
+        console.error(error);
+      }
+    }
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+    <View style={{ flex: 1, justifyContent: 'center' }}>
+      {selectedImage && (
+        <Image
+          source={{ uri: selectedImage }}
+          style={{ flex: 1, width:200, height:200 }}
+          resizeMode="contain"
+        />
+      )}
+      <View style={{ marginTop: 20 }}>
+        <Button title="Choose from Device" onPress={openImagePicker} />
+      </View>
+      <View style={{ marginTop: 20, marginBottom: 50 }}>
+        <Button title="Open Camera" onPress={handleCameraLaunch} />
+      </View>
+    </View>
+  )
 }
 
+export default App;
+
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 16,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  header: {
+      fontSize: 20,
+      marginBottom: 16,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  button: {
+      backgroundColor: "#007AFF",
+      padding: 10,
+      borderRadius: 8,
+      marginBottom: 16,
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.4,
+      shadowRadius: 4,
+      elevation: 5,
   },
-  highlight: {
-    fontWeight: '700',
+  buttonText: {
+      color: "#FFFFFF",
+      fontSize: 16,
+      fontWeight: "bold",
+  },
+  imageContainer: {
+      borderRadius: 8,
+      marginBottom: 16,
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.4,
+      shadowRadius: 4,
+      elevation: 5,
+  },
+  image: {
+      width: 200,
+      height: 200,
+      borderRadius: 8,
+  },
+  errorText: {
+      color: "red",
+      marginTop: 16,
   },
 });
-
-export default App;
