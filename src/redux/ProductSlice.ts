@@ -1,31 +1,42 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+// Define initial state
+const initialState = {
+  data: null,
+  isLoading: false,
+  isError: false,
+  errorMessage: "",
+};
+
+// Async thunk for fetching products
 export const fetchProducts = createAsyncThunk("fetchProducts",async()=>{
     const res = await fetch('https://jsonplaceholder.typicode.com/posts');
     const result = await res.json()
     return result
 })
 
-const Productslice = createSlice({
-    name:'products',
-    initialState:{
-      data:null,
-      isLoader:false,
-      isError:false  
-    },
-    extraReducers: (builder) =>{
-        builder.addCase(fetchProducts.pending,(state,action)=>{
-            state.isLoader = true
-        });
-        builder.addCase(fetchProducts.fulfilled,(state,action)=>{
-            state.isLoader = false;
-            state.data = action.payload
-        });
-        builder.addCase(fetchProducts.rejected,(state,action)=>{
-            state.isLoader = false;
-            state.isError = true
-        });
-    }
-})
+// Create slice
+const productSlice = createSlice({
+  name: "products",
+  initialState,
+  reducers: {}, // No extra reducers needed for now
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchProducts.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        // state.errorMessage = "";
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.data = action.payload;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        // state.errorMessage = action.payload || "Something went wrong";
+      });
+  },
+});
 
-export default Productslice.reducer
+export default productSlice.reducer;
